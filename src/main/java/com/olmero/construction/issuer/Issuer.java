@@ -1,4 +1,4 @@
-package com.olmero.construction.tender;
+package com.olmero.construction.issuer;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,14 +13,14 @@ import javax.persistence.Id;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Tender {
+public class Issuer {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
 
     private String name;
 
-    private String description;
+    private String pib;
 
-    private Integer issuerId;
+    private String address;
 }
