@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping(path="/tender")
 public class TenderController {
@@ -27,5 +29,11 @@ public class TenderController {
     @GetMapping
     public @ResponseBody Iterable<Tender> getAllTenders() {
         return tenderRepository.findAll();
+    }
+
+    @GetMapping(path="/issuer")
+    public @ResponseBody
+    List<Tender> getTendersForIssuer(@RequestParam Integer id) {
+        return tenderRepository.findByIssuerId(id);
     }
 }
