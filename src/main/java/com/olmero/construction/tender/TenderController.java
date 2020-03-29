@@ -1,39 +1,32 @@
 package com.olmero.construction.tender;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RequiredArgsConstructor
+@RestController
 @RequestMapping(path="/tender")
 public class TenderController {
 
-    @Autowired
-    private TenderRepository tenderRepository;
+    private final TenderService tenderService;
 
-    @PostMapping(path="/add")
-    public @ResponseBody
-    String addNewTender (@RequestBody Tender tender) {
+    @PostMapping("/add")
+    public ResponseEntity<Tender> addNewTender (@RequestBody Tender tender) {
+        Tender addedTender = tenderService.addNewTender(tender);
 
-        Tender t = new Tender();
-        t.setName(tender.getName());
-        t.setIssuerId(tender.getIssuerId());
-        t.setDescription(tender.getDescription());
-        tenderRepository.save(t);
-
-        return "Saved";
+        return ResponseEntity.ok(addedTender);
     }
 
     @GetMapping
-    public @ResponseBody Iterable<Tender> getAllTenders() {
-        return tenderRepository.findAll();
+    public ResponseEntity<List<Tender>> getAllTenders() {
+        return ResponseEntity.ok(tenderService.getAllTenders());
     }
 
-    @GetMapping(path="/issuer")
-    public @ResponseBody
-    List<Tender> getTendersForIssuer(@RequestParam Integer id) {
-        return tenderRepository.findByIssuerId(id);
+    @GetMapping("/issuer")
+    public ResponseEntity<List<Tender>> getTendersForIssuer(@RequestParam Integer id) {
+        return ResponseEntity.ok(tenderService.getTendersForIssuer(id));
     }
 }

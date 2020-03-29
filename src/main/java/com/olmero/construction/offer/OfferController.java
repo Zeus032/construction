@@ -1,68 +1,51 @@
 package com.olmero.construction.offer;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RequiredArgsConstructor
+@RestController
 @RequestMapping(path="/offer")
 public class OfferController {
 
-    @Autowired
-    private OfferRepository offerRepository;
+    private final OfferService offerService;
 
-    @PostMapping(path="/add")
-    public @ResponseBody
-    String addNewTender (@RequestBody Offer offer) {
-        offerRepository.save(offer);
+    @PostMapping("/add")
+    public ResponseEntity<Offer> addNewOffer (@RequestBody Offer offer) {
+        Offer addedOffer = offerService.addNewOffer(offer);
 
-        return "saved";
+        return ResponseEntity.ok(addedOffer);
     }
 
-    @GetMapping(path="/tender")
-    public @ResponseBody
-    List<Offer> getOffersForTender(@RequestParam Integer id) {
-        return offerRepository.findByTenderId(id);
+    @GetMapping("/tender")
+    public ResponseEntity<List<Offer>> getOffersForTender(@RequestParam Integer id) {
+        return ResponseEntity.ok(offerService.getOffersForTender(id));
     }
 
     @GetMapping
-    public @ResponseBody
-    List<Offer> getOffersBidderSubmittedForSpecificTender(@RequestParam Integer bidderId,
+    public ResponseEntity<List<Offer>> getOffersBidderSubmittedForSpecificTender(@RequestParam Integer bidderId,
                                                           @RequestParam Integer tenderId) {
-        return offerRepository.findByBidderIdAndTenderId(bidderId, tenderId);
+        return ResponseEntity.ok(offerService.findByBidderIdAndTenderId(bidderId, tenderId));
     }
 
-    @GetMapping(path="/bidder")
-    public @ResponseBody
-    List<Offer> getOffersBidderSubmittedForAllTender(@RequestParam Integer id) {
-        return offerRepository.findByBidderId(id);
+    @GetMapping("/bidder")
+    public ResponseEntity<List<Offer>> getOffersBidderSubmittedForAllTender(@RequestParam Integer id) {
+        return ResponseEntity.ok(offerService.findByBidderId(id));
     }
 
-    @GetMapping(path="/close")
-    public @ResponseBody
-    String closeTender(@RequestParam Integer tenderId) {
+    @GetMapping("/close")
+    public ResponseEntity<Offer> findBestOfferAndCloseTender(@RequestParam Integer tenderId) {
 
-        List<Offer> offerForTenderList = offerRepository.findByTenderId(tenderId);
-        Offer maxOffer = offerForTenderList.get(0);
-        if (maxOffer.getAccepted() != null)
-            return "Tender already closed";
+        Offer bestOffer = offerService.findBestOfferAndCloseTender(tenderId);
 
-        for (Offer o : offerForTenderList) {
-            if (o.getAmount() > maxOffer.getAmount())
-                maxOffer = o;
+        if (null != bestOffer) {
+            return ResponseEntity.ok(bestOffer);
         }
 
-        maxOffer.setAccepted(true);
-        offerForTenderList.remove(maxOffer);
-        offerRepository.save(maxOffer);
+        return ResponseEntity.notFound().build();
 
-        for (Offer o : offerForTenderList) {
-            o.setAccepted(false);
-            offerRepository.save(o);
-        }
-
-        return "Tender closed";
     }
 }
