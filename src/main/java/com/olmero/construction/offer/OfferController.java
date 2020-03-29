@@ -39,4 +39,30 @@ public class OfferController {
     List<Offer> getOffersBidderSubmittedForAllTender(@RequestParam Integer id) {
         return offerRepository.findByBidderId(id);
     }
+
+    @GetMapping(path="/close")
+    public @ResponseBody
+    String closeTender(@RequestParam Integer tenderId) {
+
+        List<Offer> offerForTenderList = offerRepository.findByTenderId(tenderId);
+        Offer maxOffer = offerForTenderList.get(0);
+        if (maxOffer.getAccepted() != null)
+            return "Tender already closed";
+
+        for (Offer o : offerForTenderList) {
+            if (o.getAmount() > maxOffer.getAmount())
+                maxOffer = o;
+        }
+
+        maxOffer.setAccepted(true);
+        offerForTenderList.remove(maxOffer);
+        offerRepository.save(maxOffer);
+
+        for (Offer o : offerForTenderList) {
+            o.setAccepted(false);
+            offerRepository.save(o);
+        }
+
+        return "Tender closed";
+    }
 }
